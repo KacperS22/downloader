@@ -1,6 +1,5 @@
-import { initializeApp } from "firebase/app"
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
-import { getToken } from "firebase/app-check"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
+import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSIlf59nGwmwcXep0fz9F0AiCSvWNUTIs",
