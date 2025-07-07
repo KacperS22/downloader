@@ -1,19 +1,29 @@
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 import yt_dlp
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import FileResponse
 
 app = FastAPI()
 
-@app.post("/download")
-
-async def download_video(request: Request):
-
+@app.post("/metadata")
+async def get_metadata(request: Request):
     data = await request.json()
-    url = data["url"]
+    url = data.get("url")
 
-    filename = "video.mp4"
-    ydl_opts = {"outtmpl": filename, "format": "bv*+ba/best", "merge_output_format": "mp4"}
+    ydl_opts = {
+        "quiet": True,
+        "skip_download": True,
+    }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-    
-    return FileResponse(filename, media_type="video/mp4", filename=filename)
+        info = ydl.extract_info(url, download=False)
+
+    metadata = {
+        "title": info.get("title"),
+        "uploader": info.get("uploader"),
+        "duration": info.get("duration"),
+        "view_count": info.get("view_count"),
+        "thumbnail": info.get("thumbnail"),
+        "webpage_url": info.get("webpage_url"),
+    }
+
+    return JSONResponse(content=metadata)

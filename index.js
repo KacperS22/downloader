@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
 import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js"
 
@@ -14,36 +15,41 @@ const app = initializeApp(firebaseConfig);
 
 const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider('6LcQ8HUrAAAAAIEhoVr8mySYETQJoHE_8auJbs0y'),
-
   isTokenAutoRefreshEnabled: true
 });
 
-async function download(){
-    
-    const url = document.getElementById("url").value
-    if (!url) return alert("Paste video URL")
+async function fetchMetadata() {
+  const url = document.getElementById("url").value;
+  if (!url) return alert("Paste video URL");
 
-    const { token } = await getToken(appCheck, /* forceRefresh= */ true);
-    
-    const res = await fetch('https://downloader-64781.web.app/__proxy__/proxyToBackend', {
-      method: "POST",
-      headers: { 
-        "Content-type": "application/json",
-        "X-Firebase-AppCheck": token
-      },
-      body: JSON.stringify({ url })
-    });   
+  const tokenResult = await getToken(appCheck, true);
+  const token = tokenResult.token;
 
-    if (!res.ok) {
-        const text = await res.text()
-        return alert("Error: " + text)    
-    }
+  const res = await fetch('https://us-central1-downloader-64781.cloudfunctions.net/proxyToBackend', {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+      "X-Firebase-AppCheck": token
+    },
+    body: JSON.stringify({ url })
+  });
 
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = window.URL.createObjectURL(blob);
-    a.download = "video.mp4";
-    a.click();
+  if (!res.ok) {
+    const text = await res.text();
+    return alert("Error: " + text);
+  }
+
+  const metadata = await res.json();
+
+  // Wyświetlanie metadanych
+  const output = document.getElementById("output");
+  output.innerHTML = `
+    <h3>${metadata.title}</h3>
+    <p><strong>Uploader:</strong> ${metadata.uploader}</p>
+    <p><strong>Duration:</strong> ${Math.floor(metadata.duration / 60)} min ${metadata.duration % 60} sec</p>
+    <p><strong>Views:</strong> ${metadata.view_count.toLocaleString()}</p>
+    <img src="${metadata.thumbnail}" alt="Thumbnail" width="320">
+  `;
 }
 
-document.getElementById("downloadBtn").addEventListener("click", download)
+document.getElementById("downloadBtn").addEventListener("click", fetchMetadata);

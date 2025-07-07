@@ -25,7 +25,10 @@
     "rewrites": [
       {
         "source": "/__proxy__/proxyToBackend",
-        "function": "proxyToBackend"
+        "function": {
+          "name": "proxyToBackend",
+          "region": "us-central1"
+        }
       },
       {
         "source": "**",
