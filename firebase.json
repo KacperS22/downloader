@@ -24,9 +24,13 @@
     ],
     "rewrites": [
       {
+        "source": "/__proxy__/proxyToBackend",
+        "function": "proxyToBackend"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
-      }
+      }  
     ]
   }
 }

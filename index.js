@@ -23,8 +23,10 @@ async function download(){
     
     const url = document.getElementById("url").value
     if (!url) return alert("Paste video URL")
+
+    const { token } = await getToken(appCheck, /* forceRefresh= */ true);
     
-    const res = await fetch('https://downloader-64781.web.app/__https_callable__/proxyToBackend', {
+    const res = await fetch('https://downloader-64781.web.app/__proxy__/proxyToBackend', {
       method: "POST",
       headers: { 
         "Content-type": "application/json",
@@ -44,3 +46,5 @@ async function download(){
     a.download = "video.mp4";
     a.click();
 }
+
+document.getElementById("downloadBtn").addEventListener("click", download)
