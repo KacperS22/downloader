@@ -1,0 +1,28 @@
+body {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 50px;
+}
+
+.container {
+    border: 50px;
+}
+
+#url {
+    width: 370px;
+    height: 35px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#downloadBtn {
+    width: 100px;
+    height: 35px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background-color: #CAF0F8;
+}

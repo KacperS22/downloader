@@ -1,0 +1,45 @@
+import { initializeApp } from "firebase/app"
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCSIlf59nGwmwcXep0fz9F0AiCSvWNUTIs",
+  authDomain: "downloader-64781.firebaseapp.com",
+  projectId: "downloader-64781",
+  storageBucket: "downloader-64781.firebasestorage.app",
+  messagingSenderId: "221299796310",
+  appId: "1:221299796310:web:9118e9324d40eb64250ef7"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider('6LcQ8HUrAAAAAIEhoVr8mySYETQJoHE_8auJbs0y'),
+
+  isTokenAutoRefreshEnabled: true
+});
+
+async function download(){
+    
+    const url = document.getElementById("url").value
+    
+    if (!url) return alert("Paste video URL")
+    
+    const res = await fetch('https://downloader-64781.web.app/__https_callable__/proxyToBackend', {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+
+    
+
+    if (!res.ok) {
+        const text = await res.text()
+        return alert("Error: " + text)    
+    }
+
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = window.URL.createObjectURL(blob);
+    a.download = "video.mp4";
+    a.click();
+}
