@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check"
+import { getToken } from "firebase/app-check"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSIlf59nGwmwcXep0fz9F0AiCSvWNUTIs",
@@ -21,16 +22,16 @@ const appCheck = initializeAppCheck(app, {
 async function download(){
     
     const url = document.getElementById("url").value
-    
     if (!url) return alert("Paste video URL")
     
     const res = await fetch('https://downloader-64781.web.app/__https_callable__/proxyToBackend', {
       method: "POST",
-      headers: { "Content-type": "application/json" },
+      headers: { 
+        "Content-type": "application/json",
+        "X-Firebase-AppCheck": token
+      },
       body: JSON.stringify({ url })
-    });
-
-    
+    });   
 
     if (!res.ok) {
         const text = await res.text()
