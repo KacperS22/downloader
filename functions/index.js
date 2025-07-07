@@ -29,7 +29,7 @@ exports.proxyToBackend = functions.https.onRequest(async (req, res) => {
   try {
     const url = req.body.url;
     const backendRes = await fetch(
-        "https://downloader-221299796310.europe-central2.run.app/metadata",
+        "https://downloader-221299796310.europe-central2.run.app/download",
         {
           method: "POST",
           headers: {

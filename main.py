@@ -4,7 +4,7 @@ import yt_dlp
 
 app = FastAPI()
 
-@app.post("/metadata")
+@app.post("/download")
 async def get_metadata(request: Request):
     data = await request.json()
     url = data.get("url")
