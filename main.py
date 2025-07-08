@@ -1,29 +1,32 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-import yt_dlp
+from PIL import Image
+import piexif
+import io
 
 app = FastAPI()
 
-@app.post("/download")
-async def get_metadata(request: Request):
-    data = await request.json()
-    url = data.get("url")
+@app.post("/metadata")
+async def extract_metadata(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
 
-    ydl_opts = {
-        "quiet": True,
-        "skip_download": True,
-    }
+        exif_data = piexif.load(image.info.get("exif", b""))
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
+        metadata = {}
+        
+        for ifd_name in exif_data:
+            for tag in exif_data[ifd_name]:
+                tag_name = piexif.TAGS[ifd_name][tag]["name"]
+                value = exif_data[ifd_name][tag]
+                if isinstance(value, bytes):
+                    try:
+                        value = value.decode(errors="ignore")
+                    except:
+                        continue
+                metadata[tag_name] = value
 
-    metadata = {
-        "title": info.get("title"),
-        "uploader": info.get("uploader"),
-        "duration": info.get("duration"),
-        "view_count": info.get("view_count"),
-        "thumbnail": info.get("thumbnail"),
-        "webpage_url": info.get("webpage_url"),
-    }
-
-    return JSONResponse(content=metadata)
+        return JSONResponse(content=metadata)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)

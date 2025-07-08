@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YouTube Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EXIF Metadata Viewer</title>
   <link rel="stylesheet" href="index.css" />
 </head>
 <body>
   <div class="container">
-    <h2>Insert a YouTube URL</h2>
-    <input id="url" type="text" placeholder="Enter link here" />
-    <button id="downloadBtn">Download</button>
+    <h2>Upload an Image</h2>
+    <input id="file" type="file" accept="image/*" />
+    <button id="uploadBtn">Get Metadata</button>
+    <div id="output"></div>
   </div>
 
   <script type="module" src="index.js"></script>

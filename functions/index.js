@@ -1,7 +1,9 @@
 const functions = require("firebase-functions");
-const {fetch} = require("undici");
-const {initializeApp} = require("firebase-admin/app");
-const {getAppCheck} = require("firebase-admin/app-check");
+const { initializeApp } = require("firebase-admin/app");
+const { getAppCheck } = require("firebase-admin/app-check");
+const Busboy = require("busboy");
+const { Readable } = require("stream");
+const fetch = require("node-fetch");
 
 initializeApp();
 
@@ -26,26 +28,49 @@ exports.proxyToBackend = functions.https.onRequest(async (req, res) => {
     return res.status(401).send("Invalid App Check token.");
   }
 
-  try {
-    const url = req.body.url;
-    const backendRes = await fetch(
-        "https://downloader-221299796310.europe-central2.run.app/download",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({url}),
-        });
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
+  }
 
-    if (!backendRes.ok) {
-      const errorText = await backendRes.text();
-      return res.status(backendRes.status).send(errorText);
+  const busboy = new Busboy({ headers: req.headers });
+
+  let fileBuffer = null;
+  let fileMimeType = "";
+
+  busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+    const chunks = [];
+    file.on("data", (data) => chunks.push(data));
+    file.on("end", () => {
+      fileBuffer = Buffer.concat(chunks);
+      fileMimeType = mimetype;
+    });
+  });
+
+  busboy.on("finish", async () => {
+    if (!fileBuffer) {
+      return res.status(400).send("No file uploaded.");
     }
 
-    const json = await backendRes.json();
-    return res.status(200).json(json);
-  } catch (err) {
-    return res.status(500).send("Proxy error: " + err.message);
-  }
+    try {
+      const backendRes = await fetch("https://downloader-221299796310.europe-central2.run.app/metadata", {
+        method: "POST",
+        headers: {
+          "Content-Type": fileMimeType,
+        },
+        body: fileBuffer,
+      });
+
+      if (!backendRes.ok) {
+        const text = await backendRes.text();
+        return res.status(backendRes.status).send(text);
+      }
+
+      const json = await backendRes.json();
+      return res.status(200).json(json);
+    } catch (err) {
+      return res.status(500).send("Proxy error: " + err.message);
+    }
+  });
+
+  req.pipe(busboy);
 });
