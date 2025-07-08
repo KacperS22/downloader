@@ -1,8 +1,7 @@
 const functions = require("firebase-functions");
-const { initializeApp } = require("firebase-admin/app");
-const { getAppCheck } = require("firebase-admin/app-check");
+const {initializeApp} = require("firebase-admin/app");
+const {getAppCheck} = require("firebase-admin/app-check");
 const Busboy = require("busboy");
-const { Readable } = require("stream");
 const fetch = require("node-fetch");
 
 initializeApp();
@@ -32,7 +31,7 @@ exports.proxyToBackend = functions.https.onRequest(async (req, res) => {
     return res.status(405).send("Method Not Allowed");
   }
 
-  const busboy = new Busboy({ headers: req.headers });
+  const busboy = new Busboy({headers: req.headers});
 
   let fileBuffer = null;
   let fileMimeType = "";
